@@ -1,10 +1,10 @@
 import express from 'express'
-import {getUserRoutes} from './users'
+import {getPaymentRoutes} from './payments'
 
 function getRoutes() {
   const router = express.Router()
-  router.use('/users', getUserRoutes())
+  router.use('/users', getPaymentRoutes())
   return router
 }
 
-export {getRoutes}
+export {getPaymentRoutes}
