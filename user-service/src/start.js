@@ -6,9 +6,10 @@ import {getRoutes} from './routes'
 function startServer({port = process.env.PORT} = {}) {
   const app = express()
 
-  app.use('/api', getRoutes())
-
+  app.use(express.json())
   app.use(errorMiddleware)
+
+  app.use('/api', getRoutes())
 
   return new Promise((resolve) => {
     const server = app.listen(port, () => {

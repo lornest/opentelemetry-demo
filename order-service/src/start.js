@@ -1,4 +1,5 @@
 import express from 'express'
+// import bodyParser from 'body-parser'
 import 'express-async-errors'
 import logger from 'loglevel'
 import {getRoutes} from './routes'
@@ -6,8 +7,10 @@ import {getRoutes} from './routes'
 function startServer({port = process.env.PORT} = {}) {
   const app = express()
 
+  app.use(express.json())
+  
   app.use('/api', getRoutes())
-
+  
   app.use(errorMiddleware)
 
   return new Promise((resolve) => {

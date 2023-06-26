@@ -9,7 +9,9 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
-    "loglevel": "^1.6.8"
+    "humps": "^2.0.1",
+    "loglevel": "^1.6.8",
+    "pg": "^8.11.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",

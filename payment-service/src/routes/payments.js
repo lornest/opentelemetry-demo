@@ -2,12 +2,12 @@ import express from 'express'
 
 function getPaymentRoutes() {
   const router = express.Router()
-  router.get('/', makePayment)
+  router.post('', makePayment)
   return router
 }
 
 async function makePayment(req, res) {
-  res.send("Hello from payment-service!")
+  res.send(`Payment made successfully with card ${req.body.paymentCard}`)
 }
 
 export {getPaymentRoutes}

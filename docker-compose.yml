@@ -1,17 +1,18 @@
 version: '3.8'
 services:
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '3000:3000'
   user-service:
     build:
       context: ./user-service
       dockerfile: Dockerfile
     ports:
       - '5001:3000'
+    environment:
+      - USER_SERVICE_DB_HOST=user-service-db
+      - USER_SERVICE_DB_PORT=5432
+      - USER_SERVICE_DB_NAME=user_service_db
+      - USER_SERVICE_DB_USER=admin
+      - USER_SERVICE_DB_PASSWORD=password
+        
   order-service:
     build:
       context: ./order-service
@@ -27,6 +28,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - '5003:3000'
+  user-service-db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=user_service_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./config/postgres/user-service-init.sql:/docker-entrypoint-initdb.d/init.sql
     # depends_on:
     #   - postgres
   # Collector
@@ -80,19 +92,6 @@ services:
   #     - ./config/prometheus.yaml:/etc/prometheus/prometheus.yml
   #   ports:
   #     - "9090:9090"
-
-  # postgres:
-  #   image: postgres:latest
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=password
-  #   ports:
-  #     - '5432:5432'
-  #   volumes: 
-  #     # - ./postgres-data:/var/lib/postgresql/data
-  #     # # copy the sql script to create tables
-  #     - ./config/postgres/test.sql:/docker-entrypoint-initdb.d/create_tables.sql
   
   # loki:
   #   image: grafana/loki:2.8.0

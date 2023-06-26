@@ -6,6 +6,10 @@ import {getRoutes} from './routes'
 function startServer({port = process.env.PORT} = {}) {
   const app = express()
 
+  app.use(express.json())
+
+  app.use(express.urlencoded({extended: true}))
+
   app.use('/api', getRoutes())
 
   app.use(errorMiddleware)

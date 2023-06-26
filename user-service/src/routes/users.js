@@ -1,4 +1,6 @@
 import express from 'express'
+import humps from 'humps'
+import { findUser } from '../repositories/user-repository'
 
 function getUserRoutes() {
   const router = express.Router()
@@ -7,7 +9,9 @@ function getUserRoutes() {
 }
 
 async function getUser(req, res) {
-  res.send("Hello from user-service!")
+  let user = await findUser(req.params.id)
+  user = humps.camelizeKeys(user)
+  res.json(user)
 }
 
 export {getUserRoutes}

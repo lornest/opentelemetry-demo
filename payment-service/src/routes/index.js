@@ -3,8 +3,8 @@ import {getPaymentRoutes} from './payments'
 
 function getRoutes() {
   const router = express.Router()
-  router.use('/users', getPaymentRoutes())
+  router.use('/payments', getPaymentRoutes())
   return router
 }
 
-export {getPaymentRoutes}
+export {getRoutes}
