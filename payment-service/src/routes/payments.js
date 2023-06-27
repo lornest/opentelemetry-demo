@@ -7,8 +7,11 @@ function getPaymentRoutes() {
   return router
 }
 
+/**
+  This function makes some calls to stubbed out third party payment providers.
+  We simulate some network delays to make the calls more realistic.
+ */
 async function processPayment(req, res) {
-  // call validateCardNumber and return an error if invalid
   let cardValid = validateCardNumber(req.body.paymentCard);
   if (!cardValid) {
     res.status(500).send(`Card ${req.body.paymentCard} failed validation`)
