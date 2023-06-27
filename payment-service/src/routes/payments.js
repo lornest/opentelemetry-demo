@@ -24,8 +24,9 @@ async function processPayment(req, res) {
 }
 
 function validateCardNumber(cardNumber) {
-  // here we're just hardcoding a response based on the mock users. One of them has a valid card, the other doesn't
-  return cardNumber === "****-****-****-9876"
+  // here we're just hardcoding a response based on the mock users. One card is valid the other is not
+  // we're also simulating a network delay of up to a 2 seconds
+  return delay(cardNumber === "****-****-****-9876", Math.random() * 2)
 }
 
 async function processWithThirdPartyPaymentProvider() {
