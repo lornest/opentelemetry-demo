@@ -11,7 +11,7 @@ function startServer({port = process.env.PORT} = {}) {
   app.use(express.urlencoded({extended: true}))
 
   app.use('/api', getRoutes())
-
+  
   app.use(errorMiddleware)
 
   return new Promise((resolve) => {
@@ -33,6 +33,7 @@ function errorMiddleware(error, req, res, next) {
   if (res.headersSent) {
     next(error)
   } else {
+    console.log("I'm here")
     logger.error(error)
     res.status(500)
     res.json({

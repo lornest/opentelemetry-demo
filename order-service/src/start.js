@@ -9,9 +9,9 @@ function startServer({port = process.env.PORT} = {}) {
 
   app.use(express.json())
   
-  app.use('/api', getRoutes())
-  
   app.use(errorMiddleware)
+  
+  app.use('/api', getRoutes())
 
   return new Promise((resolve) => {
     const server = app.listen(port, () => {

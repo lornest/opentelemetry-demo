@@ -21,7 +21,7 @@ async function createOrder(req, res) {
   console.log(`Making payment request to ${makePaymentEndpoint}`)
   let user = await userResponse.json()
   console.log(user)
-  const paymentResponse = await fetch(`${makePaymentEndpoint}`, {
+  const paymentResponse = await fetch(`${makePaymentEndpoint}/processPayment`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -29,6 +29,7 @@ async function createOrder(req, res) {
     body: JSON.stringify({
       userId: user.id,
       paymentCard: user.paymentCard,
+      cardValid: false,
     })
   })
   if (!paymentResponse.ok) {
