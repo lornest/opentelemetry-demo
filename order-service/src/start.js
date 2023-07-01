@@ -1,5 +1,4 @@
 import express from 'express'
-// import bodyParser from 'body-parser'
 import 'express-async-errors'
 import logger from 'loglevel'
 import {getRoutes} from './routes'

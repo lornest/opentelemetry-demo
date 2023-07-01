@@ -11,7 +11,7 @@ function getOrderRoutes() {
 
 async function createOrder(req, res) {
   // First, we fetch the user from the user service
-  console.log(req.body)
+  console.log(req.headers)
   const userResponse = await fetch(`${getUserEndpoint}/${req.body.userId}`)
   if (!userResponse.ok) {
     res.status(500).send("Error fetching user")

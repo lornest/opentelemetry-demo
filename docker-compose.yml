@@ -83,7 +83,7 @@ services:
       - ./config/loki-config.yaml:/etc/loki/local-config.yaml
   
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
+    image: otel/opentelemetry-collector-contrib:0.80.0
     command: [ --config=/etc/otel-collector-config.yaml ]
     volumes:
       - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
