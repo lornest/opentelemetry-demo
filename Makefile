@@ -17,3 +17,15 @@ down:
 	@echo "Stopping docker compose..."
 	docker-compose down
 	@echo "Done!"
+
+## install: install all dependencies
+install:
+	@echo "Installing dependencies..."
+	find . -maxdepth 2 -name package.json -execdir npm i \;
+	@echo "Done!"
+
+## logs: show logs from all containers
+logs:
+	@echo "Showing logs from all containers..."
+	docker-compose logs -f
+	@echo "Done!"

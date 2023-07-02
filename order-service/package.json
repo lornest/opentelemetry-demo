@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "A simple order service for demonstrating OpenTelemetry",
   "main": "index.js",
-  "engines": {
-    "node": "20.1.0"
-  },
   "dependencies": {
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.14.0",

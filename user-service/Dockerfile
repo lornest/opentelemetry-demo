@@ -1,10 +1,10 @@
-FROM node:20
+FROM node:18
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+RUN npm ci
 
 COPY . .
 
@@ -15,5 +15,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-# Define the command to start the app
 CMD [ "node", "." ]
