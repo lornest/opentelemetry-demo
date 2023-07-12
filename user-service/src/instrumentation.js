@@ -25,11 +25,7 @@ const initTelemetry = function (serviceName) {
         url: `http://otel-collector:4318/v1/traces`
     });
 
-
     tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
-    tracerProvider.register({
-        propagator: new W3CTraceContextPropagator(),
-      });
 
     registerInstrumentations({
             instrumentations: [
