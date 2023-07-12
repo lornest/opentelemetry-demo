@@ -59,9 +59,3 @@ service:
       receivers: [otlp, docker_stats]
       processors: [batch]
       exporters: [prometheus]
-
-  telemetry:
-    logs:
-      level: "debug"
-    #metrics:
-    #  address: ":8888"
