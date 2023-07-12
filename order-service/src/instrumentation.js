@@ -3,7 +3,7 @@ const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 const { Resource } = require('@opentelemetry/resources');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-const { DiagConsoleLogger, DiagLogLevel, diag } = require('@opentelemetry/api');
+const { metrics, DiagConsoleLogger, DiagLogLevel, diag } = require('@opentelemetry/api');
 const { SemanticResourceAttributes } = require("@opentelemetry/semantic-conventions");
 const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
@@ -15,6 +15,9 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 const initTelemetry = function (serviceName) {
 
+    /**
+     * Initialize the trace exporter
+     */
     const tracerProvider = new NodeTracerProvider({
         resource: Resource.default().merge(new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
@@ -25,11 +28,7 @@ const initTelemetry = function (serviceName) {
         url: `http://otel-collector:4318/v1/traces`
     });
 
-
     tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
-    tracerProvider.register({
-        propagator: new W3CTraceContextPropagator(),
-      });
 
     registerInstrumentations({
             instrumentations: [
