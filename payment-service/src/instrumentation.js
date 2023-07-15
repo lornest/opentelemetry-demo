@@ -26,6 +26,7 @@ const initTelemetry = function (serviceName) {
     });
 
     tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
+    tracerProvider.register();
 
     registerInstrumentations({
             instrumentations: [
