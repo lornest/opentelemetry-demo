@@ -12,7 +12,7 @@ function getPaymentRoutes() {
   We simulate some network delays to make the calls more realistic.
  */
 async function processPayment(req, res) {
-  let cardValid = validateCardNumber(req.body.paymentCard);
+  let cardValid = await validateCardNumber(req.body.paymentCard);
   if (!cardValid) {
     res.status(500).send(`Card ${req.body.paymentCard} failed validation`)
     return
@@ -26,15 +26,15 @@ async function processPayment(req, res) {
   res.send(`Payment made successfully with card ${req.body.paymentCard}`)
 }
 
-function validateCardNumber(cardNumber) {
+async function validateCardNumber(cardNumber) {
   // here we're just hardcoding a response based on the mock users. One card is valid the other is not
   // we're also simulating a network delay of up to a 2 seconds
-  return delay(cardNumber === "****-****-****-9876", Math.random() * 1)
+  return await delay(cardNumber === "****-****-****-9876", Math.random() * 1)
 }
 
 async function processWithThirdPartyPaymentProvider() {
   // here we're simulating a call to a third party payment provider, with potential network delays up to 6 seconds.
-  return delay(Math.random() < 0.5, Math.random() * 3)
+  return await delay(Math.random() < 0.5, Math.random() * 3)
 }
 
 export {getPaymentRoutes}

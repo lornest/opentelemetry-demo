@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+
+  frontend: 
+    build: 
+      context: ./frontend
+      target: development
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    volumes:
+      - ./frontend/src:/app/src
+
   user-service-db:
     image: postgres:latest
     restart: always
