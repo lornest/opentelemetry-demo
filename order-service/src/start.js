@@ -2,6 +2,7 @@ import express from 'express'
 import 'express-async-errors'
 import logger from 'loglevel'
 import {getRoutes} from './routes'
+import cors from 'cors'
 
 function startServer({port = process.env.PORT} = {}) {
   const app = express()
@@ -9,7 +10,8 @@ function startServer({port = process.env.PORT} = {}) {
   app.use(express.json())
   
   app.use(errorMiddleware)
-  
+  app.use(cors())
+
   app.use('/api', getRoutes())
 
   return new Promise((resolve) => {

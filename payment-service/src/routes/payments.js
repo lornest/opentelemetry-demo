@@ -12,6 +12,7 @@ function getPaymentRoutes() {
   We simulate some network delays to make the calls more realistic.
  */
 async function processPayment(req, res) {
+  console.log(`Processing payment with card ${req.body.paymentCard}`)
   let cardValid = await validateCardNumber(req.body.paymentCard);
   if (!cardValid) {
     res.status(500).send(`Card ${req.body.paymentCard} failed validation`)

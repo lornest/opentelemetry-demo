@@ -28,8 +28,8 @@ async function createOrder(req, res) {
     },
     body: JSON.stringify({
       userId: user.id,
-      paymentCard: user.paymentCard,
-      cardValid: false,
+      paymentCard: req.body.cardNumber,
+      postalCode: user.postalCode,
     })
   })
   if (!paymentResponse.ok) {
@@ -37,7 +37,7 @@ async function createOrder(req, res) {
     res.status(500).send("Error making payment")
     return
   }
-  res.send("Order created!")
+  res.status(200).send("Order successfully created")
 }
 
 export {getOrderRoutes}

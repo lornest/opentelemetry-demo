@@ -39,6 +39,18 @@ services:
     depends_on:
       - user-service-db
 
+  order-service-db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=order_service_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./config/postgres/order-service-init.sql:/docker-entrypoint-initdb.d/init.sql
+
   order-service:
     build:
       context: ./order-service
@@ -48,6 +60,13 @@ services:
     environment:
       - USER_SERVICE_URL=http://user-service:3000
       - PAYMENT_SERVICE_URL=http://payment-service:3000
+      - ORDER_SERVICE_DB_HOST=order-service-db
+      - ORDER_SERVICE_DB_PORT=5433
+      - ORDER_SERVICE_DB_NAME=order_service_db
+      - ORDER_SERVICE_DB_USER=admin
+      - ORDER_SERVICE_DB_PASSWORD=password
+    depends_on:
+      - order-service-db
 
   payment-service:
     build:
