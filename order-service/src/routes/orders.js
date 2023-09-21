@@ -1,4 +1,5 @@
 import express from 'express'
+import { insertOrder } from '../repositories/order-repository'
 
 const getUserEndpoint = `${process.env.USER_SERVICE_URL}/api/users`
 const makePaymentEndpoint = `${process.env.PAYMENT_SERVICE_URL}/api/payments`
@@ -29,7 +30,7 @@ async function createOrder(req, res) {
     body: JSON.stringify({
       userId: user.id,
       paymentCard: req.body.cardNumber,
-      postalCode: user.postalCode,
+      postalCode: user.postalCode, 
     })
   })
   if (!paymentResponse.ok) {
@@ -37,7 +38,18 @@ async function createOrder(req, res) {
     res.status(500).send("Error making payment")
     return
   }
-  res.status(200).send("Order successfully created")
+
+  const insertResult = await insertOrder({
+    userId: user.id,
+    cardNumber: req.body.cardNumber,
+  })
+
+  if (!insertResult) {
+    res.status(500).send("Error creating order in database")
+    return
+  }
+
+  res.send("Order created successfully")
 }
 
 export {getOrderRoutes}

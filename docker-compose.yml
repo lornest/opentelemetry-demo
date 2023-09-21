@@ -61,7 +61,7 @@ services:
       - USER_SERVICE_URL=http://user-service:3000
       - PAYMENT_SERVICE_URL=http://payment-service:3000
       - ORDER_SERVICE_DB_HOST=order-service-db
-      - ORDER_SERVICE_DB_PORT=5433
+      - ORDER_SERVICE_DB_PORT=5432
       - ORDER_SERVICE_DB_NAME=order_service_db
       - ORDER_SERVICE_DB_USER=admin
       - ORDER_SERVICE_DB_PASSWORD=password

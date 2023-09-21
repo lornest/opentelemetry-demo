@@ -18,6 +18,7 @@ const initTelemetry = function (serviceName) {
     const tracerProvider = new NodeTracerProvider({
         resource: Resource.default().merge(new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+            [SemanticResourceAttributes.SERVICE_NAMESPACE]: "otel-demo",
         })),
     });
 

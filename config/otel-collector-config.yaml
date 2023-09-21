@@ -19,7 +19,7 @@ receivers:
         include_metadata: true
         cors:
           allowed_origins:
-            - http://localhost:3000
+            - http://localhost:8080
           max_age: 7200
         endpoint: :4318
       grpc:

@@ -9,6 +9,7 @@ const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-expre
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 const { W3CTraceContextPropagator } = require('@opentelemetry/core');
 const { FetchInstrumentation } = require('opentelemetry-instrumentation-fetch-node');
+const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
 
 // Setup the OpenTelemetry diag logger to print to the console.
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
@@ -21,6 +22,7 @@ const initTelemetry = function (serviceName) {
     const tracerProvider = new NodeTracerProvider({
         resource: Resource.default().merge(new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+            [SemanticResourceAttributes.SERVICE_NAMESPACE]: "otel-demo",
         })),
     });
 
@@ -36,6 +38,7 @@ const initTelemetry = function (serviceName) {
                 new FetchInstrumentation(),
                 new HttpInstrumentation(),
                 new ExpressInstrumentation(),            
+                new PgInstrumentation(),         
             ],
     });
 }
