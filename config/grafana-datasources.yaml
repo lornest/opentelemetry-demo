@@ -28,8 +28,18 @@ datasources:
       httpMethod: GET
       serviceMap:
         datasourceUid: prometheus
+      tracesToLogs: 
+        datasourceUid: loki
+        mappedTags: [{ key: 'service.name', value: 'service' }]
+        mapTagNamesEnabled: true
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+        filterBySpanID: false
+        lokiSearch: true
   - name: Loki
     type: loki
+    uid: loki
     access: proxy
     orgId: 1
     url: http://loki:3100
@@ -37,3 +47,9 @@ datasources:
     isDefault: false
     version: 1
     editable: false
+    jsonData:
+      derivedFields:
+        - datasourceUid: tempo 
+          name: trace_id
+          matcherRegex: '.*"trace_id":"(\w+)".*'
+          url: $${__value.raw}

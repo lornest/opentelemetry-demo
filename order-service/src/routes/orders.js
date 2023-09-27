@@ -1,5 +1,6 @@
 import express from 'express'
 import { insertOrder } from '../repositories/order-repository'
+import { logger } from '../logger'
 
 const getUserEndpoint = `${process.env.USER_SERVICE_URL}/api/users`
 const makePaymentEndpoint = `${process.env.PAYMENT_SERVICE_URL}/api/payments`
@@ -11,17 +12,15 @@ function getOrderRoutes() {
 }
 
 async function createOrder(req, res) {
-  // First, we fetch the user from the user service
-  console.log(req.headers)
+  logger.info(`Calling user service to get user with ID: ${req.body.userId}`)
   const userResponse = await fetch(`${getUserEndpoint}/${req.body.userId}`)
   if (!userResponse.ok) {
     res.status(500).send("Error fetching user")
     return
   }
-  // We then use the user's information to make a payment request to the payment service
-  console.log(`Making payment request to ${makePaymentEndpoint}`)
+
+  logger.info(`Calling payment service to make payment with card number: ${req.body.cardNumber}`)
   let user = await userResponse.json()
-  console.log(user)
   const paymentResponse = await fetch(`${makePaymentEndpoint}/processPayment`, {
     method: 'POST',
     headers: {
@@ -34,7 +33,7 @@ async function createOrder(req, res) {
     })
   })
   if (!paymentResponse.ok) {
-    console.log(paymentResponse.text())
+    logger.error(`Error making payment for card number: ${req.body.cardNumber}`)
     res.status(500).send("Error making payment")
     return
   }

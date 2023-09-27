@@ -2,6 +2,7 @@ import express from 'express'
 import { delay } from '../utils/delay'
 import otel, { SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import { logger } from '../logger'
 
 function getPaymentRoutes() {
   const router = express.Router()
@@ -21,7 +22,7 @@ async function processPayment(req, res) {
     span.setAttribute(SemanticAttributes.CODE_FUNCTION, 'processPayment')
     span.setAttribute(SemanticAttributes.CODE_FILEPATH, __filename)
     span.setAttribute('paymentCard', req.body.paymentCard)
-    console.log(`Processing payment with card ${req.body.paymentCard}`)
+    logger.info(`Processing payment with card ${req.body.paymentCard}`)
     let cardValid = await validateCardNumber(req.body.paymentCard);
     if (!cardValid) {
       res.status(500).send(`Card ${req.body.paymentCard} failed validation`)
@@ -29,7 +30,6 @@ async function processPayment(req, res) {
       return
     }
     let success = await processWithThirdPartyPaymentProvider()
-    console.log(success)
     if (!success) {
       res.status(500).send(`Payment failed with card ${req.body.paymentCard}`)
       span.end()
@@ -50,15 +50,15 @@ async function validateCardNumber(cardNumber) {
   return tracer.startActiveSpan('payment-service.validateCardNumber', async (span) => {
     span.setAttribute(SemanticAttributes.CODE_FUNCTION, 'validateCardNumber')
     span.setAttribute(SemanticAttributes.CODE_FILEPATH, __filename)
+    span.setAttribute('cardNumber', cardNumber)
     
-    console.log(`Validating card number ${cardNumber}`)
     let valid = await delay(cardNumber === "****-****-****-9876", Math.random() * 1)
     if (!valid) {
+      logger.error(`Card ${cardNumber} failed validation`)
       span.setStatus({
         code: SpanStatusCode.ERROR,
         message: "Card failed validation"
       })
-      console.log("Card failed validation")
     } else {
       console.log("Card passed validation")
     }

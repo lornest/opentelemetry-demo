@@ -10,6 +10,7 @@ const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
 const { W3CTraceContextPropagator } = require('@opentelemetry/core');
 const { FetchInstrumentation } = require('opentelemetry-instrumentation-fetch-node');
 const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
+const { WinstonInstrumentation } = require('@opentelemetry/instrumentation-winston');
 
 // Setup the OpenTelemetry diag logger to print to the console.
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
@@ -39,6 +40,7 @@ const initTelemetry = function (serviceName) {
                 new HttpInstrumentation(),
                 new ExpressInstrumentation(),            
                 new PgInstrumentation(),         
+                new WinstonInstrumentation(),
             ],
     });
 }
