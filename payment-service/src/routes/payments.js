@@ -76,6 +76,7 @@ async function processWithThirdPartyPaymentProvider() {
   return tracer.startActiveSpan('payment-service.processWithThirdPartyPaymentProvider', async (span) => {
     span.setAttribute(SemanticAttributes.CODE_FUNCTION, 'processWithThirdPartyPaymentProvider')
     span.setAttribute(SemanticAttributes.CODE_FILEPATH, __filename)
+    span.setAttribute('thirdPartyPaymentProvider', 'Stripe')
     
     console.log("Processing payment with third party payment provider")
     let successful = await delay(Math.random() < 0.5, Math.random() * 3)
