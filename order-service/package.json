@@ -2,7 +2,8 @@
   "name": "order-service",
   "version": "1.0.0",
   "description": "A simple order service for demonstrating OpenTelemetry",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.js",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.56.0",
@@ -26,15 +27,11 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.26.0",
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "@babel/register": "^7.25.0",
     "nodemon": "^3.1.0"
   },
   "scripts": {
-    "start": "node .",
-    "build": "babel --delete-dir-on-start --out-dir dist --copy-files --ignore \"**/__tests__/**,**/__mocks__/**\" --no-copy-ignored src"
+    "start": "node --import ./src/instrumentation.js src/index.js",
+    "dev": "nodemon --watch src --import ./src/instrumentation.js src/index.js"
   },
   "keywords": [],
   "author": "Lorne Stalker <lorne.stalker@google.com>",
