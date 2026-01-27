@@ -1,10 +1,14 @@
 import { Resource } from '@opentelemetry/resources';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
-import { W3CTraceContextPropagator } from '@opentelemetry/core';
+import { W3CTraceContextPropagator, W3CBaggagePropagator, CompositePropagator } from '@opentelemetry/core';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
+import { ZoneContextManager } from '@opentelemetry/context-zone';
+
+// service.namespace is an incubating attribute, so we use a string literal
+const ATTR_SERVICE_NAMESPACE = 'service.namespace';
 
 export const initTelemetry = function (serviceName: string) {
 
@@ -14,34 +18,25 @@ export const initTelemetry = function (serviceName: string) {
         url: `${OTEL_ENDPOINT}/v1/traces`
     });
 
-    const tracerProvider = new WebTracerProvider({
-        resource: Resource.default().merge(new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-            [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'otel-demo',
-        })),
-    });
+    const resource = Resource.default().merge(new Resource({
+        [ATTR_SERVICE_NAME]: serviceName,
+        [ATTR_SERVICE_NAMESPACE]: 'otel-demo',
+    }));
 
-    tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
+    const tracerProvider = new WebTracerProvider({
+        resource,
+        spanProcessors: [new BatchSpanProcessor(traceExporter)],
+    });
 
     tracerProvider.register({
-        propagator: new W3CTraceContextPropagator(),
+        contextManager: new ZoneContextManager(),
+        propagator: new CompositePropagator({
+            propagators: [
+                new W3CTraceContextPropagator(),
+                new W3CBaggagePropagator(),
+            ],
+        }),
     });
-
-
-    // const metricExporter = new OTLPMetricExporter({
-    //     url: 'http://host.docker.internal:4318/v1/metrics',
-    // });
-
-    // const meterProvider = new MeterProvider({
-    //     resource: new Resource({
-    //         [SemanticResourceAttributes.SERVICE_NAME]: serviceName
-    //     }),
-    // });
-
-    // meterProvider.addMetricReader(new PeriodicExportingMetricReader({
-    //     exporter: metricExporter,
-    //     exportIntervalMillis: 10000,
-    // }));
 
     registerInstrumentations({
         instrumentations: [
