@@ -1,40 +1,46 @@
-const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
-const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { Resource } = require('@opentelemetry/resources');
-const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+
+// service.namespace is an incubating attribute, so we use a string literal
+const ATTR_SERVICE_NAMESPACE = 'service.namespace';
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-const { DiagConsoleLogger, DiagLogLevel, diag } = require('@opentelemetry/api');
-const { SemanticResourceAttributes } = require("@opentelemetry/semantic-conventions");
 const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
 const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-const { W3CTraceContextPropagator } = require('@opentelemetry/core');
+const { WinstonInstrumentation } = require('@opentelemetry/instrumentation-winston');
+const { DiagConsoleLogger, DiagLogLevel, diag } = require('@opentelemetry/api');
 
-// Setup the OpenTelemetry diag logger to print to the console.
+// Setup the OpenTelemetry diag logger to print to the console
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 const initTelemetry = function (serviceName) {
-
-    const tracerProvider = new NodeTracerProvider({
-        resource: Resource.default().merge(new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-            [SemanticResourceAttributes.SERVICE_NAMESPACE]: "otel-demo",
-        })),
-    });
-
     const traceExporter = new OTLPTraceExporter({
-        url: `http://otel-collector:4318/v1/traces`
+        url: 'http://otel-collector:4318/v1/traces'
     });
 
-    tracerProvider.addSpanProcessor(new BatchSpanProcessor(traceExporter));
-    tracerProvider.register();
+    const sdk = new NodeSDK({
+        resource: Resource.default().merge(new Resource({
+            [ATTR_SERVICE_NAME]: serviceName,
+            [ATTR_SERVICE_NAMESPACE]: 'otel-demo',
+        })),
+        traceExporter,
+        instrumentations: [
+            new HttpInstrumentation(),
+            new ExpressInstrumentation(),
+            new PgInstrumentation(),
+            new WinstonInstrumentation(),
+        ],
+    });
 
-    registerInstrumentations({
-            instrumentations: [
-                new HttpInstrumentation(),
-                new ExpressInstrumentation(),   
-                new PgInstrumentation(),         
-            ],
+    sdk.start();
+
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+        sdk.shutdown()
+            .then(() => console.log('OpenTelemetry SDK shut down successfully'))
+            .catch((error) => console.log('Error shutting down OpenTelemetry SDK', error))
+            .finally(() => process.exit(0));
     });
 }
 

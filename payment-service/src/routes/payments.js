@@ -1,8 +1,12 @@
 import express from 'express'
 import { delay } from '../utils/delay'
 import otel, { SpanStatusCode } from '@opentelemetry/api'
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import { logger } from '../logger'
+
+// Code semantic conventions are incubating, so we use string literals
+// See: https://opentelemetry.io/docs/specs/semconv/general/attributes/#source-code-attributes
+const ATTR_CODE_FUNCTION = 'code.function'
+const ATTR_CODE_FILEPATH = 'code.filepath'
 
 function getPaymentRoutes() {
   const router = express.Router()
@@ -19,8 +23,8 @@ const tracer = otel.trace.getTracer('payment-service')
  */
 async function processPayment(req, res) {
   return tracer.startActiveSpan('payment-service.processPayment', async (span) => {
-    span.setAttribute(SemanticAttributes.CODE_FUNCTION, 'processPayment')
-    span.setAttribute(SemanticAttributes.CODE_FILEPATH, __filename)
+    span.setAttribute(ATTR_CODE_FUNCTION, 'processPayment')
+    span.setAttribute(ATTR_CODE_FILEPATH, __filename)
     span.setAttribute('paymentCard', req.body.paymentCard)
     logger.info(`Processing payment with card ${req.body.paymentCard}`)
     let cardValid = await validateCardNumber(req.body.paymentCard);
@@ -48,10 +52,10 @@ async function processPayment(req, res) {
  */
 async function validateCardNumber(cardNumber) {
   return tracer.startActiveSpan('payment-service.validateCardNumber', async (span) => {
-    span.setAttribute(SemanticAttributes.CODE_FUNCTION, 'validateCardNumber')
-    span.setAttribute(SemanticAttributes.CODE_FILEPATH, __filename)
+    span.setAttribute(ATTR_CODE_FUNCTION, 'validateCardNumber')
+    span.setAttribute(ATTR_CODE_FILEPATH, __filename)
     span.setAttribute('cardNumber', cardNumber)
-    
+
     let valid = await delay(cardNumber === "****-****-****-9876", Math.random() * 1)
     if (!valid) {
       logger.error(`Card ${cardNumber} failed validation`)
@@ -74,9 +78,9 @@ async function validateCardNumber(cardNumber) {
  */
 async function processWithThirdPartyPaymentProvider() {
   return tracer.startActiveSpan('payment-service.processWithThirdPartyPaymentProvider', async (span) => {
-    span.setAttribute(SemanticAttributes.CODE_FUNCTION, 'processWithThirdPartyPaymentProvider')
-    span.setAttribute(SemanticAttributes.CODE_FILEPATH, __filename)
-    
+    span.setAttribute(ATTR_CODE_FUNCTION, 'processWithThirdPartyPaymentProvider')
+    span.setAttribute(ATTR_CODE_FILEPATH, __filename)
+
     console.log("Processing payment with third party payment provider")
     let successful = await delay(Math.random() < 0.5, Math.random() * 3)
     if (!successful) {
@@ -84,7 +88,7 @@ async function processWithThirdPartyPaymentProvider() {
         code: SpanStatusCode.ERROR,
         message: "Payment failed"
       })
-    } 
+    }
     span.end()
     return successful
   })

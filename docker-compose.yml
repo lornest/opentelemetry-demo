@@ -1,9 +1,8 @@
-version: '3.8'
 services:
 
-  frontend: 
+  frontend:
     container_name: frontend
-    build: 
+    build:
       context: ./frontend
       target: development
     ports:
@@ -15,7 +14,7 @@ services:
 
   user-service-db:
     container_name: user-service-db
-    image: postgres:latest
+    image: postgres:16
     restart: always
     environment:
       - POSTGRES_USER=admin
@@ -25,7 +24,12 @@ services:
       - '5432:5432'
     volumes:
       - ./config/postgres/user-service-init.sql:/docker-entrypoint-initdb.d/init.sql
-  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d user_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   user-service:
     container_name: user-service
     build:
@@ -39,12 +43,14 @@ services:
       - USER_SERVICE_DB_NAME=user_service_db
       - USER_SERVICE_DB_USER=admin
       - USER_SERVICE_DB_PASSWORD=password
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     depends_on:
-      - user-service-db
+      user-service-db:
+        condition: service_healthy
 
   order-service-db:
     container_name: order-service-db
-    image: postgres:latest
+    image: postgres:16
     restart: always
     environment:
       - POSTGRES_USER=admin
@@ -54,6 +60,11 @@ services:
       - '5433:5432'
     volumes:
       - ./config/postgres/order-service-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d order_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   order-service:
     container_name: order-service
@@ -70,8 +81,10 @@ services:
       - ORDER_SERVICE_DB_NAME=order_service_db
       - ORDER_SERVICE_DB_USER=admin
       - ORDER_SERVICE_DB_PASSWORD=password
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     depends_on:
-      - order-service-db
+      order-service-db:
+        condition: service_healthy
 
   payment-service:
     container_name: payment-service
@@ -80,23 +93,23 @@ services:
       dockerfile: Dockerfile
     ports:
       - '5003:3000'
-      
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.4.0
     volumes:
       - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
-      # - ./config/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
-      # - ./dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
-      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor traceQLStreaming metricsSummary
     ports:
       - "3000:3000"
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.6.1
     command: "--config.file=/etc/tempo.yaml"
     volumes:
       - ./config/tempo.yaml:/etc/tempo.yaml
@@ -104,23 +117,23 @@ services:
       - "3200:3200"
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v3.1.0
     command: "--config.file=/etc/prometheus.yaml"
     volumes:
       - ./config/prometheus.yaml:/etc/prometheus.yaml
     ports:
       - "9090:9090"
-  
+
   loki:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:3.3.2
     ports:
       - "3100:3100"
     command: "-config.file=/etc/loki/local-config.yaml"
     volumes:
       - ./config/loki-config.yaml:/etc/loki/local-config.yaml
-  
+
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.80.0
+    image: otel/opentelemetry-collector-contrib:0.116.0
     command: [ --config=/etc/otel-collector-config.yaml ]
     volumes:
       - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -139,6 +152,11 @@ services:
       - loki
       - grafana
       - promtail
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:13133/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   socat:
      image: bpack/socat
@@ -149,11 +167,10 @@ services:
         - "2375"
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.3.2
     command: [ -config.file=/etc/promtail.yaml ]
     volumes:
       - ./config/promtail.yaml:/etc/promtail.yaml
-      # to read container labels and logs
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 3101:3101

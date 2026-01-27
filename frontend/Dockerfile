@@ -1,5 +1,5 @@
 ### STAGE 1: Setup the environment & install dependencies ###
-FROM node:16.18-buster-slim AS setup
+FROM node:22-slim AS setup
 
 WORKDIR /app
 
@@ -10,5 +10,5 @@ COPY . .
 
 ### STAGE 2: Run the app in development mode ###
 FROM setup AS development
-CMD ["npm", "run", "dev"]
-
+EXPOSE 8080
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "8080"]
